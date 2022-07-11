@@ -1,0 +1,83 @@
+#name: nmae the workflow 
+#on is used to tell github whihc trigger you want to cause this workflow to be run
+
+#push: workflow to run when the code is commited to repo
+#on: push
+
+#mutliple triggers can be done by specifying them in an array using square brackets
+#on: [push, pull_request]
+#jobs: each job run in own env, we csn have multiplejobs in this workflow and run in own VM
+# use two spaces to denote the hierarchy here
+#jobs: 
+  #example-actions-job:
+    #name:to display on the actions page when it is running in workflow
+    #runs-on: this is required , this is the type of machine to run the job on, there are pre-defined lables to tell let the github to spinup the VM with a specific OS and set up the built-in tools
+    #runs-on: ubuntu-latest
+    #runs-on: [ubuntu-latest,macos-latest,windows-latest] , can specify specific versions as well.
+    #steps: where we write the set of commands 
+      #-run: runs command line program using default shell (bash on nonwindows), $ and curly braces tells github that this syntax to be eliminated.
+      
+#uses: tells github that this is action and where the actual code for that action is stored, actions repo is provided by github
+#checkout- this action is to check the code out of the repo in github and copy onto runner.
+#if: conditional logic
+#with: with keyword is used to pass the parameters
+    
+    
+    
+    
+name: GitHub Actions Demo
+on: push
+jobs:
+  Example-Actions-Job:
+    name: Exploring GitHub Actions
+    runs-on: ubuntu-latest
+    steps:
+      # Display the event that triggered the workflow
+      - run: echo "The job was triggered by a ${{ github.event_name }} event."
+      
+      # Runner information
+      - run: echo "This job is now running on a ${{ runner.os }} server hosted by GitHub"
+      
+      # Information about the repository and branch
+      - run: echo "The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      
+      # Use Action located in https://github.com/actions
+      - name: Check out repository code
+        uses: actions/checkout@v2  
+      
+      - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
+      
+      - run: echo "Your repository has been copied to the path ${{ github.workspace }} on the runner."
+      
+      - run: echo "The workflow is now ready to test your code on the runner."
+      
+      - name: conditional step when event name is pull request
+        if: ${{ github.event_name == 'pull_request' }}
+        run: echo "This event is a pull request"
+      
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      
+      - name: Setup dotnet on runner
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.x'
+      
+      - name: Display dotnet version
+        run: dotnet --version
+      
+      - run: echo "The preinstalled tools are located here on the runner ${{ runner.tool_cache }}."
+      
+      - name: List files in tool cache
+        run: |
+          ls ${{ runner.tool_cache }}
+      
+      - run: echo "This job's status is ${{ job.status }}."
+
+  Second-Job:
+    name: The second job running on another runner
+    runs-on: windows-latest
+    needs: Example-Actions-Job
+    steps:
+      - run: echo "This job is now running on a ${{ runner.os }} server hosted by GitHub."
